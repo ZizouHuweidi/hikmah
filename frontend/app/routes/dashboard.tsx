@@ -190,8 +190,8 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      <div className="flex min-h-screen items-center justify-center bg-[#f6f5ef]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#286f62]" />
       </div>
     );
   }
@@ -201,7 +201,7 @@ export default function DashboardPage() {
   const librarySources = data.library.map((item) => ({ item, source: item.source }));
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#f6f5ef]">
       <DashboardHeader
         displayName={user.username || user.email || "reader"}
         onLogout={handleLogout}

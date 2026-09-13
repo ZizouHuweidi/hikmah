@@ -34,21 +34,21 @@ export function DashboardHeader({
   onLogout: () => void;
 }) {
   return (
-    <header className="border-b border-slate-200 bg-white">
+    <header className="border-b border-[#d7dbd2] bg-[#fbfaf5]">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-emerald-600 p-2">
+          <div className="rounded-lg bg-[#1d4236] p-2">
             <Library className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-slate-900">Sabeel</span>
+          <span className="text-xl font-bold text-[#14221d]">Sabeel</span>
         </div>
         <div className="flex items-center gap-4">
-          <span className="hidden text-sm text-slate-600 sm:inline">Welcome, {displayName}</span>
+          <span className="hidden text-sm text-[#67746e] sm:inline">Welcome, {displayName}</span>
           <Button
             variant="ghost"
             size="sm"
             onClick={onLogout}
-            className="text-slate-600 hover:text-red-600"
+            className="text-[#67746e] hover:text-red-600"
           >
             <LogOut className="mr-2 h-4 w-4" />
             Logout
@@ -63,8 +63,8 @@ export function DashboardIntro() {
   return (
     <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Dashboard</h1>
-        <p className="mt-2 text-slate-600">
+        <h1 className="text-3xl font-bold text-[#14221d]">Dashboard</h1>
+        <p className="mt-2 text-[#67746e]">
           Build and test your knowledge library with real platform data.
         </p>
       </div>
@@ -102,7 +102,7 @@ export function LibraryPanel({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Library className="h-5 w-5 text-emerald-600" />
+          <Library className="h-5 w-5 text-[#286f62]" />
           My Library
         </CardTitle>
         <CardDescription>
@@ -188,7 +188,7 @@ export function AddBookCard({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Plus className="h-5 w-5 text-emerald-600" />
+          <Plus className="h-5 w-5 text-[#286f62]" />
           Add a Book
         </CardTitle>
         <CardDescription>Minimal book creation for MVP testing.</CardDescription>
@@ -271,7 +271,7 @@ export function SourceActivityCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <select
-          className="h-9 w-full rounded-md border border-slate-300 bg-white px-3 text-sm"
+          className="h-9 w-full rounded-md border border-[#b9c2b8] bg-[#fbfaf5] px-3 text-sm"
           value={selectedSourceID}
           onChange={(event) => onSelectedSourceChange(event.target.value)}
           disabled={librarySources.length === 0}
@@ -289,12 +289,12 @@ export function SourceActivityCard({
 
         <form className="space-y-3" onSubmit={onSubmitNote}>
           <textarea
-            className="min-h-24 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+            className="min-h-24 w-full rounded-md border border-[#b9c2b8] bg-[#fbfaf5] px-3 py-2 text-sm"
             value={noteContent}
             onChange={(event) => onNoteContentChange(event.target.value)}
             placeholder="Write a note..."
           />
-          <label className="flex items-center gap-2 text-sm text-slate-600">
+          <label className="flex items-center gap-2 text-sm text-[#67746e]">
             <input
               type="checkbox"
               checked={notePublic}
@@ -312,10 +312,10 @@ export function SourceActivityCard({
           </Button>
         </form>
 
-        <form className="space-y-3 border-t border-slate-200 pt-4" onSubmit={onSubmitReview}>
+        <form className="space-y-3 border-t border-[#d7dbd2] pt-4" onSubmit={onSubmitReview}>
           <div className="grid grid-cols-[90px_1fr] gap-3">
             <select
-              className="h-9 rounded-md border border-slate-300 bg-white px-3 text-sm"
+              className="h-9 rounded-md border border-[#b9c2b8] bg-[#fbfaf5] px-3 text-sm"
               value={reviewRating}
               onChange={(event) => onReviewRatingChange(event.target.value)}
             >
@@ -341,13 +341,13 @@ export function SourceActivityCard({
           </Button>
         </form>
 
-        <form className="space-y-3 border-t border-slate-200 pt-4" onSubmit={onSubmitCollection}>
+        <form className="space-y-3 border-t border-[#d7dbd2] pt-4" onSubmit={onSubmitCollection}>
           <Input
             value={collectionName}
             onChange={(event) => onCollectionNameChange(event.target.value)}
             placeholder="Collection name"
           />
-          <label className="flex items-center gap-2 text-sm text-slate-600">
+          <label className="flex items-center gap-2 text-sm text-[#67746e]">
             <input
               type="checkbox"
               checked={collectionPublic}
@@ -389,7 +389,7 @@ export function RecentNotesCard({
             {notes.slice(0, 5).map((note) => (
               <div
                 key={note.id}
-                className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700"
+                className="rounded-lg border border-[#d7dbd2] bg-[#fbfaf5] p-3 text-sm text-[#14221d]"
               >
                 <p>{note.content}</p>
                 <Button
@@ -429,7 +429,7 @@ export function RecentReviewsCard({
             {reviews.slice(0, 5).map((review) => (
               <div
                 key={review.id}
-                className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700"
+                className="rounded-lg border border-[#d7dbd2] bg-[#fbfaf5] p-3 text-sm text-[#14221d]"
               >
                 <p className="font-medium">{review.rating}/5 stars</p>
                 {review.content && <p className="mt-1">{review.content}</p>}
@@ -470,10 +470,10 @@ export function CollectionsCard({
             {collections.slice(0, 5).map((collection) => (
               <div
                 key={collection.id}
-                className="rounded-lg border border-slate-200 bg-white p-3 text-sm text-slate-700"
+                className="rounded-lg border border-[#d7dbd2] bg-[#fbfaf5] p-3 text-sm text-[#14221d]"
               >
                 <p className="font-medium">{collection.name}</p>
-                <p className="mt-1 text-slate-500">
+                <p className="mt-1 text-[#67746e]">
                   {collection.is_public ? "Public" : "Private"} ·{" "}
                   {collection.source_ids?.length || 0} sources
                 </p>
@@ -505,23 +505,23 @@ function LibraryItemRow({
 }) {
   const source = item.source;
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
+    <div className="rounded-lg border border-[#d7dbd2] bg-[#fbfaf5] p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <Link
             to={`/sources/books/${item.source_id}`}
-            className="font-medium text-slate-900 hover:text-emerald-700"
+            className="font-medium text-[#14221d] hover:text-[#1d4236]"
           >
             {source?.title || item.source_id}
           </Link>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[#67746e]">
             {item.status.replace("_", " ")} · {item.visibility}
           </p>
         </div>
         <div className="flex flex-col items-end gap-2">
-          <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+          <CheckCircle2 className="h-5 w-5 text-[#286f62]" />
           <select
-            className="h-8 rounded-md border border-slate-300 bg-white px-2 text-xs"
+            className="h-8 rounded-md border border-[#b9c2b8] bg-[#fbfaf5] px-2 text-xs"
             value={item.status}
             onChange={(event) => onUpdate(item.id, { status: event.target.value })}
           >
@@ -568,15 +568,15 @@ function SourceRow({
   source: Source;
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-lg border border-[#d7dbd2] bg-[#fbfaf5] p-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <Link
           to={`/sources/books/${source.id}`}
-          className="font-medium text-slate-900 hover:text-emerald-700"
+          className="font-medium text-[#14221d] hover:text-[#1d4236]"
         >
           {source.title}
         </Link>
-        <p className="mt-1 text-sm text-slate-500">{source.publisher || source.type}</p>
+        <p className="mt-1 text-sm text-[#67746e]">{source.publisher || source.type}</p>
       </div>
       {!isInLibrary && (
         <Button variant="outline" size="sm" onClick={() => onAdd(source.id)}>
@@ -591,10 +591,10 @@ function StatCard({ icon, label, value }: { icon: ReactNode; label: string; valu
   return (
     <Card className="gap-2 py-4">
       <CardContent className="flex items-center gap-3 px-4">
-        <div className="rounded-lg bg-emerald-50 p-2 text-emerald-700">{icon}</div>
+        <div className="rounded-lg bg-[#e4ecc9] p-2 text-[#1d4236]">{icon}</div>
         <div>
-          <p className="text-2xl font-bold text-slate-900">{value}</p>
-          <p className="text-xs text-slate-500">{label}</p>
+          <p className="text-2xl font-bold text-[#14221d]">{value}</p>
+          <p className="text-xs text-[#67746e]">{label}</p>
         </div>
       </CardContent>
     </Card>
@@ -603,7 +603,7 @@ function StatCard({ icon, label, value }: { icon: ReactNode; label: string; valu
 
 function LoadingRow() {
   return (
-    <div className="flex items-center gap-2 py-8 text-sm text-slate-500">
+    <div className="flex items-center gap-2 py-8 text-sm text-[#67746e]">
       <Loader2 className="h-4 w-4 animate-spin" />
       Loading platform data...
     </div>
@@ -612,7 +612,7 @@ function LoadingRow() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm text-slate-500">
+    <div className="rounded-lg border border-dashed border-[#b9c2b8] bg-[#f6f5ef] p-6 text-center text-sm text-[#67746e]">
       {message}
     </div>
   );

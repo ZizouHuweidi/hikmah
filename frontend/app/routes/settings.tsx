@@ -59,8 +59,8 @@ export default function SettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      <div className="flex min-h-screen items-center justify-center bg-[#f6f5ef]">
+        <Loader2 className="h-8 w-8 animate-spin text-[#286f62]" />
       </div>
     );
   }
@@ -69,14 +69,14 @@ export default function SettingsPage() {
   const loadingProfile = profileQuery.isLoading;
 
   return (
-    <div className="min-h-screen bg-slate-50 py-8">
+    <div className="min-h-screen bg-[#f6f5ef] py-8">
       <div className="mx-auto max-w-2xl px-4">
         <div className="mb-8 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-emerald-600 p-2">
+            <div className="rounded-xl bg-[#1d4236] p-2">
               <Library className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-slate-900">Account Settings</h1>
+            <h1 className="text-2xl font-bold text-[#14221d]">Account Settings</h1>
           </div>
           <Link to="/dashboard">
             <Button variant="outline">Dashboard</Button>
@@ -92,7 +92,7 @@ export default function SettingsPage() {
           </div>
         )}
         {message && (
-          <div className="mb-6 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          <div className="mb-6 rounded-lg border border-[#c8e05c] bg-[#e4ecc9] px-4 py-3 text-sm text-[#1d4236]">
             {message}
           </div>
         )}
@@ -100,38 +100,38 @@ export default function SettingsPage() {
         <Card>
           <CardContent className="space-y-6 pt-6">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
-                <User className="h-6 w-6 text-emerald-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e4ecc9]">
+                <User className="h-6 w-6 text-[#286f62]" />
               </div>
               <div>
-                <p className="font-medium text-slate-900">{user.username}</p>
-                <p className="text-sm text-slate-500">Username</p>
+                <p className="font-medium text-[#14221d]">{user.username}</p>
+                <p className="text-sm text-[#67746e]">Username</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
-                <Mail className="h-6 w-6 text-emerald-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e4ecc9]">
+                <Mail className="h-6 w-6 text-[#286f62]" />
               </div>
               <div>
-                <p className="font-medium text-slate-900">{user.email || "No email"}</p>
-                <p className="text-sm text-slate-500">Email address</p>
+                <p className="font-medium text-[#14221d]">{user.email || "No email"}</p>
+                <p className="text-sm text-[#67746e]">Email address</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
-                <Shield className="h-6 w-6 text-emerald-600" />
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#e4ecc9]">
+                <Shield className="h-6 w-6 text-[#286f62]" />
               </div>
               <div>
-                <p className="font-medium text-slate-900">Protected by Zitadel</p>
-                <p className="text-sm text-slate-500">
+                <p className="font-medium text-[#14221d]">Protected by Zitadel</p>
+                <p className="text-sm text-[#67746e]">
                   Manage sign-in methods with your identity account.
                 </p>
               </div>
             </div>
 
-            <form className="space-y-4 border-t border-slate-200 pt-6" onSubmit={handleSave}>
+            <form className="space-y-4 border-t border-[#d7dbd2] pt-6" onSubmit={handleSave}>
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
+                <label className="mb-2 block text-sm font-medium text-[#14221d]">
                   Display name
                 </label>
                 <Input
@@ -142,16 +142,16 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">Bio</label>
+                <label className="mb-2 block text-sm font-medium text-[#14221d]">Bio</label>
                 <textarea
-                  className="min-h-28 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+                  className="min-h-28 w-full rounded-md border border-[#b9c2b8] bg-[#fbfaf5] px-3 py-2 text-sm"
                   value={bio}
                   onChange={(event) => setBio(event.target.value)}
                   placeholder="What are you reading, researching, or collecting?"
                   disabled={loadingProfile}
                 />
               </div>
-              <label className="flex items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <label className="flex items-start gap-3 rounded-lg border border-[#d7dbd2] bg-[#f6f5ef] p-4 text-sm text-[#14221d]">
                 <input
                   type="checkbox"
                   className="mt-1"
@@ -160,16 +160,16 @@ export default function SettingsPage() {
                   disabled={loadingProfile}
                 />
                 <span>
-                  <span className="block font-medium text-slate-900">Make my profile public</span>
+                  <span className="block font-medium text-[#14221d]">Make my profile public</span>
                   Public profiles can anchor public notes, reviews, collections, and library items.
                 </span>
               </label>
               {profile?.public_profile && user.username && (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[#67746e]">
                   Public profile:{" "}
                   <Link
                     to={`/users/${user.username}/profile`}
-                    className="font-medium text-emerald-700 underline-offset-4 hover:underline"
+                    className="font-medium text-[#1d4236] underline-offset-4 hover:underline"
                   >
                     /users/{user.username}/profile
                   </Link>
