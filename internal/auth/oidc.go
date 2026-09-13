@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -38,9 +39,21 @@ type OIDCConfig struct {
 }
 
 type oidcFlow struct {
-	issuer   string
-	oauth    oauth2.Config
-	verifier *oidc.IDTokenVerifier
+	issuer      string
+	userInfoURL string
+	oauth       oauth2.Config
+	verifier    *oidc.IDTokenVerifier
+}
+
+type identityClaims struct {
+	Issuer            string `json:"iss"`
+	Subject           string `json:"sub"`
+	Email             string `json:"email"`
+	EmailVerified     bool   `json:"email_verified"`
+	Name              string `json:"name"`
+	PreferredUsername string `json:"preferred_username"`
+	Nonce             string `json:"nonce"`
+	NotBefore         int64  `json:"nbf"`
 }
 
 func NewOIDCFlow(ctx context.Context, config OIDCConfig) (OIDCFlow, error) {
@@ -51,7 +64,8 @@ func NewOIDCFlow(ctx context.Context, config OIDCConfig) (OIDCFlow, error) {
 	}
 	keySet := oidc.NewRemoteKeySet(ctx, internalURL+"/oauth/v2/keys")
 	return &oidcFlow{
-		issuer: issuer,
+		issuer:      issuer,
+		userInfoURL: internalURL + "/oidc/v1/userinfo",
 		oauth: oauth2.Config{
 			ClientID: config.ClientID, ClientSecret: config.ClientSecret, RedirectURL: config.RedirectURL,
 			Endpoint: oauth2.Endpoint{AuthURL: issuer + "/oauth/v2/authorize", TokenURL: internalURL + "/oauth/v2/token"},
@@ -82,21 +96,17 @@ func (f *oidcFlow) Authenticate(ctx context.Context, code, verifier, nonce strin
 	if err != nil {
 		return OIDCIdentity{}, fmt.Errorf("verify id token: %w", err)
 	}
-	var claims struct {
-		Issuer            string `json:"iss"`
-		Subject           string `json:"sub"`
-		Email             string `json:"email"`
-		EmailVerified     bool   `json:"email_verified"`
-		Name              string `json:"name"`
-		PreferredUsername string `json:"preferred_username"`
-		Nonce             string `json:"nonce"`
-		NotBefore         int64  `json:"nbf"`
-	}
+	var claims identityClaims
 	if err := idToken.Claims(&claims); err != nil {
 		return OIDCIdentity{}, fmt.Errorf("decode id token claims: %w", err)
 	}
 	if claims.Issuer != f.issuer || claims.Subject == "" || claims.NotBefore > time.Now().Unix() || !hmac.Equal([]byte(claims.Nonce), []byte(nonce)) {
 		return OIDCIdentity{}, errors.New("id token claims do not match login state")
+	}
+	if claims.Email == "" || !claims.EmailVerified {
+		if err := f.enrichIdentityClaims(ctx, token, &claims); err != nil {
+			return OIDCIdentity{}, err
+		}
 	}
 	displayName := strings.TrimSpace(claims.Name)
 	if displayName == "" {
@@ -107,6 +117,37 @@ func (f *oidcFlow) Authenticate(ctx context.Context, code, verifier, nonce strin
 		EmailVerified: claims.EmailVerified, DisplayName: displayName,
 		PreferredUsername: claims.PreferredUsername,
 	}, nil
+}
+
+func (f *oidcFlow) enrichIdentityClaims(ctx context.Context, token *oauth2.Token, claims *identityClaims) error {
+	request, err := http.NewRequestWithContext(ctx, http.MethodGet, f.userInfoURL, nil)
+	if err != nil {
+		return fmt.Errorf("create userinfo request: %w", err)
+	}
+	response, err := oauth2.NewClient(ctx, oauth2.StaticTokenSource(token)).Do(request)
+	if err != nil {
+		return fmt.Errorf("fetch userinfo: %w", err)
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return fmt.Errorf("fetch userinfo: unexpected status %s", response.Status)
+	}
+	var userInfo identityClaims
+	if err := json.NewDecoder(response.Body).Decode(&userInfo); err != nil {
+		return fmt.Errorf("decode userinfo: %w", err)
+	}
+	if userInfo.Subject != claims.Subject {
+		return errors.New("userinfo subject does not match id token")
+	}
+	claims.Email = userInfo.Email
+	claims.EmailVerified = userInfo.EmailVerified
+	if claims.Name == "" {
+		claims.Name = userInfo.Name
+	}
+	if claims.PreferredUsername == "" {
+		claims.PreferredUsername = userInfo.PreferredUsername
+	}
+	return nil
 }
 
 type oauthState struct {
