@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -31,12 +32,15 @@ type DatabaseConfig struct {
 }
 
 type AuthConfig struct {
-	Issuer               string
-	Audience             string
-	Ed25519PrivateKey    string
-	AccessTokenLifetime  time.Duration
-	RefreshTokenLifetime time.Duration
-	CookieSecure         bool
+	Issuer          string
+	InternalURL     string
+	ClientID        string
+	ClientSecret    string
+	RedirectURL     string
+	StateKey        string
+	PublicURL       string
+	SessionLifetime time.Duration
+	CookieSecure    bool
 }
 
 // Load reads configuration from environment variables.
@@ -61,20 +65,16 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	accessTokenLifetime, err := getDurationEnv("AUTH_ACCESS_TOKEN_LIFETIME", 15*time.Minute)
+	sessionLifetime, err := getDurationEnv("SABEEL_SESSION_LIFETIME", 12*time.Hour)
 	if err != nil {
 		return nil, err
 	}
-	refreshTokenLifetime, err := getDurationEnv("AUTH_REFRESH_TOKEN_LIFETIME", 720*time.Hour)
-	if err != nil {
-		return nil, err
-	}
-	cookieSecure, err := getBoolEnv("AUTH_COOKIE_SECURE", false)
+	cookieSecure, err := getBoolEnv("SABEEL_SESSION_SECURE", false)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Config{
+	cfg := &Config{
 		Environment: getEnv("ENVIRONMENT", "development"),
 		Server: ServerConfig{
 			Port:               getEnv("PORT", "8080"),
@@ -89,14 +89,46 @@ func Load() (*Config, error) {
 			ConnMaxLifetime: connMaxLifetime,
 		},
 		Auth: AuthConfig{
-			Issuer:               getEnv("AUTH_ISSUER", "sabeel"),
-			Audience:             getEnv("AUTH_AUDIENCE", "sabeel-api"),
-			Ed25519PrivateKey:    getEnv("AUTH_ED25519_PRIVATE_KEY", ""),
-			AccessTokenLifetime:  accessTokenLifetime,
-			RefreshTokenLifetime: refreshTokenLifetime,
-			CookieSecure:         cookieSecure,
+			Issuer:          strings.TrimSuffix(getEnv("SABEEL_OIDC_ISSUER", "http://127.0.0.1:8081"), "/"),
+			InternalURL:     strings.TrimSuffix(getEnv("SABEEL_OIDC_INTERNAL_URL", "http://zitadel-dev-proxy:8080"), "/"),
+			ClientID:        strings.TrimSpace(os.Getenv("SABEEL_OIDC_CLIENT_ID")),
+			ClientSecret:    strings.TrimSpace(os.Getenv("SABEEL_OIDC_CLIENT_SECRET")),
+			RedirectURL:     getEnv("SABEEL_OIDC_REDIRECT_URL", "http://localhost:8080/auth/callback"),
+			StateKey:        strings.TrimSpace(os.Getenv("SABEEL_OIDC_STATE_KEY")),
+			PublicURL:       strings.TrimSuffix(getEnv("SABEEL_PUBLIC_URL", "http://localhost:3000"), "/"),
+			SessionLifetime: sessionLifetime,
+			CookieSecure:    cookieSecure,
 		},
-	}, nil
+	}
+	if !absoluteHTTPURL(cfg.Auth.Issuer) || !absoluteHTTPURL(cfg.Auth.InternalURL) || !absoluteHTTPURL(cfg.Auth.RedirectURL) || !absoluteHTTPURL(cfg.Auth.PublicURL) {
+		return nil, fmt.Errorf("Sabeel OIDC and public URLs must be absolute http or https URLs")
+	}
+	if cfg.Auth.ClientID == "" || cfg.Auth.ClientSecret == "" {
+		return nil, fmt.Errorf("SABEEL_OIDC_CLIENT_ID and SABEEL_OIDC_CLIENT_SECRET are required")
+	}
+	if len(cfg.Auth.StateKey) < 32 {
+		return nil, fmt.Errorf("SABEEL_OIDC_STATE_KEY must contain at least 32 characters")
+	}
+	if cfg.Auth.SessionLifetime <= 0 {
+		return nil, fmt.Errorf("SABEEL_SESSION_LIFETIME must be positive")
+	}
+	if cfg.Environment == "production" && !cfg.Auth.CookieSecure {
+		return nil, fmt.Errorf("production requires secure auth cookies")
+	}
+	if cfg.Environment == "production" && (!httpsURL(cfg.Auth.Issuer) || !httpsURL(cfg.Auth.RedirectURL) || !httpsURL(cfg.Auth.PublicURL)) {
+		return nil, fmt.Errorf("production requires HTTPS issuer, redirect, and public URLs")
+	}
+	return cfg, nil
+}
+
+func absoluteHTTPURL(raw string) bool {
+	parsed, err := url.Parse(raw)
+	return err == nil && parsed.Host != "" && (parsed.Scheme == "http" || parsed.Scheme == "https")
+}
+
+func httpsURL(raw string) bool {
+	parsed, err := url.Parse(raw)
+	return err == nil && parsed.Host != "" && parsed.Scheme == "https"
 }
 
 func getEnv(key, defaultValue string) string {

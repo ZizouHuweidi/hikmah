@@ -88,13 +88,11 @@ export function DashboardStats({ data }: { data: DashboardData }) {
 }
 
 export function LibraryPanel({
-  accessToken,
   items,
   loading,
   onDelete,
   onUpdate,
 }: {
-  accessToken: string | null;
   items: LibraryItemWithSource[];
   loading: boolean;
   onDelete: (id: string) => void;
@@ -119,13 +117,7 @@ export function LibraryPanel({
         ) : (
           <div className="space-y-3">
             {items.slice(0, 8).map((item) => (
-              <LibraryItemRow
-                key={item.id}
-                accessToken={accessToken}
-                item={item}
-                onDelete={onDelete}
-                onUpdate={onUpdate}
-              />
+              <LibraryItemRow key={item.id} item={item} onDelete={onDelete} onUpdate={onUpdate} />
             ))}
           </div>
         )}
@@ -135,13 +127,11 @@ export function LibraryPanel({
 }
 
 export function SourcesPanel({
-  accessToken,
   librarySourceIDs,
   loading,
   onAdd,
   sources,
 }: {
-  accessToken: string | null;
   librarySourceIDs: Set<string>;
   loading: boolean;
   onAdd: (sourceID: string) => void;
@@ -163,7 +153,6 @@ export function SourcesPanel({
             {sources.slice(0, 8).map((source) => (
               <SourceRow
                 key={source.id}
-                accessToken={accessToken}
                 isInLibrary={librarySourceIDs.has(source.id)}
                 onAdd={onAdd}
                 source={source}
@@ -506,12 +495,10 @@ export function CollectionsCard({
 }
 
 function LibraryItemRow({
-  accessToken,
   item,
   onDelete,
   onUpdate,
 }: {
-  accessToken: string | null;
   item: LibraryItemWithSource;
   onDelete: (id: string) => void;
   onUpdate: (id: string, payload: unknown) => void;
@@ -536,7 +523,7 @@ function LibraryItemRow({
           <select
             className="h-8 rounded-md border border-slate-300 bg-white px-2 text-xs"
             value={item.status}
-            onChange={(event) => accessToken && onUpdate(item.id, { status: event.target.value })}
+            onChange={(event) => onUpdate(item.id, { status: event.target.value })}
           >
             <option value="to_consume">To consume</option>
             <option value="in_progress">In progress</option>
@@ -549,7 +536,6 @@ function LibraryItemRow({
               variant="ghost"
               size="xs"
               onClick={() =>
-                accessToken &&
                 onUpdate(item.id, {
                   visibility: item.visibility === "public" ? "private" : "public",
                 })
@@ -561,7 +547,7 @@ function LibraryItemRow({
               variant="ghost"
               size="xs"
               className="text-red-600"
-              onClick={() => accessToken && onDelete(item.id)}
+              onClick={() => onDelete(item.id)}
             >
               Remove
             </Button>
@@ -573,12 +559,10 @@ function LibraryItemRow({
 }
 
 function SourceRow({
-  accessToken,
   isInLibrary,
   onAdd,
   source,
 }: {
-  accessToken: string | null;
   isInLibrary: boolean;
   onAdd: (id: string) => void;
   source: Source;
@@ -595,7 +579,7 @@ function SourceRow({
         <p className="mt-1 text-sm text-slate-500">{source.publisher || source.type}</p>
       </div>
       {!isInLibrary && (
-        <Button variant="outline" size="sm" onClick={() => accessToken && onAdd(source.id)}>
+        <Button variant="outline" size="sm" onClick={() => onAdd(source.id)}>
           Add to library
         </Button>
       )}

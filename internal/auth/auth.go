@@ -1,6 +1,9 @@
 package auth
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
@@ -9,29 +12,33 @@ import (
 
 const userIDContextKey = "user_id"
 
+const (
+	SessionCookieName    = "sabeel_session"
+	OAuthStateCookieName = "sabeel_oauth_state"
+)
+
 type User struct {
-	ID           uuid.UUID `json:"id" db:"id"`
-	Email        string    `json:"email" db:"email"`
-	Username     string    `json:"username" db:"username"`
-	PasswordHash string    `json:"-" db:"password_hash"`
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
+	ID        uuid.UUID `json:"id" db:"id"`
+	Email     string    `json:"email" db:"email"`
+	Username  string    `json:"username" db:"username"`
+	Issuer    string    `json:"-" db:"oidc_issuer"`
+	Subject   string    `json:"-" db:"oidc_subject"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }
 
-type RefreshToken struct {
-	ID        uuid.UUID  `db:"id"`
-	UserID    uuid.UUID  `db:"user_id"`
-	TokenHash []byte     `db:"token_hash"`
-	FamilyID  uuid.UUID  `db:"family_id"`
-	ExpiresAt time.Time  `db:"expires_at"`
-	RevokedAt *time.Time `db:"revoked_at"`
-	CreatedAt time.Time  `db:"created_at"`
+func NewSessionToken() (string, []byte, error) {
+	raw := make([]byte, 32)
+	if _, err := rand.Read(raw); err != nil {
+		return "", nil, err
+	}
+	token := base64.RawURLEncoding.EncodeToString(raw)
+	return token, HashSessionToken(token), nil
 }
 
-type RefreshTokenRotation struct {
-	CurrentTokenID uuid.UUID
-	NewToken       RefreshToken
-	ReplacedByID   uuid.UUID
+func HashSessionToken(token string) []byte {
+	hash := sha256.Sum256([]byte(token))
+	return hash[:]
 }
 
 func SetUserID(c *echo.Context, userID uuid.UUID) {

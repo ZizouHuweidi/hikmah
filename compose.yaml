@@ -30,10 +30,14 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       PORT: 8080
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:5173,http://localhost:5173}
-      AUTH_ISSUER: ${AUTH_ISSUER:-sabeel}
-      AUTH_AUDIENCE: ${AUTH_AUDIENCE:-sabeel-api}
-      AUTH_ED25519_PRIVATE_KEY: ${AUTH_ED25519_PRIVATE_KEY:-}
-      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
+      SABEEL_PUBLIC_URL: ${SABEEL_PUBLIC_URL:-http://localhost:3000}
+      SABEEL_OIDC_ISSUER: ${SABEEL_OIDC_ISSUER:-http://127.0.0.1:8081}
+      SABEEL_OIDC_INTERNAL_URL: ${SABEEL_OIDC_INTERNAL_URL:-http://zitadel-dev-proxy:8080}
+      SABEEL_OIDC_CLIENT_ID: ${SABEEL_OIDC_CLIENT_ID:-}
+      SABEEL_OIDC_CLIENT_SECRET: ${SABEEL_OIDC_CLIENT_SECRET:-}
+      SABEEL_OIDC_REDIRECT_URL: ${SABEEL_OIDC_REDIRECT_URL:-http://localhost:8080/auth/callback}
+      SABEEL_OIDC_STATE_KEY: ${SABEEL_OIDC_STATE_KEY:-sabeel-development-oidc-state-key-change-me}
+      SABEEL_SESSION_SECURE: ${SABEEL_SESSION_SECURE:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -43,6 +47,9 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - default
+      - company_edge
 
   frontend:
     build:
@@ -67,3 +74,9 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  default:
+  company_edge:
+    external: true
+    name: company-edge

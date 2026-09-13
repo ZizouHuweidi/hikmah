@@ -56,7 +56,7 @@ export function normalizeDashboardData(data: Partial<DashboardData>): DashboardD
 export default function DashboardPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isAuthenticated, isLoading, user, accessToken, logout } = useAuthStore();
+  const { isAuthenticated, isLoading, user, logout } = useAuthStore();
   const [error, setError] = useState<string | null>(null);
   const [bookTitle, setBookTitle] = useState("");
   const [bookAuthor, setBookAuthor] = useState("");
@@ -76,16 +76,15 @@ export default function DashboardPage() {
   }, [isAuthenticated, isLoading, navigate]);
 
   const dashboardQuery = useQuery({
-    queryKey: ["dashboard", accessToken],
-    enabled: Boolean(isAuthenticated && accessToken),
+    queryKey: ["dashboard"],
+    enabled: isAuthenticated,
     queryFn: async () => {
-      const token = accessToken as string;
       const [sources, library, notes, reviews, collections] = await Promise.all([
         listSources(),
-        listLibrary(token),
-        listNotes(token),
-        listReviews(token),
-        listCollections(token),
+        listLibrary(),
+        listNotes(),
+        listReviews(),
+        listCollections(),
       ]);
       return normalizeDashboardData({ sources, library, notes, reviews, collections });
     },
@@ -103,13 +102,13 @@ export default function DashboardPage() {
 
   const createBookMutation = useMutation({
     mutationFn: async () => {
-      if (!accessToken || !bookTitle.trim()) return;
-      const book = await createBook(accessToken, {
+      if (!bookTitle.trim()) return;
+      const book = await createBook({
         title: bookTitle.trim(),
         isbn_13: bookISBN.trim() || undefined,
         contributors: bookAuthor.trim() ? [{ name: bookAuthor.trim(), role: "author" }] : [],
       });
-      await addLibraryItem(accessToken, book.source.id);
+      await addLibraryItem(book.source.id);
     },
     onSuccess: async () => {
       setBookTitle("");
@@ -126,10 +125,9 @@ export default function DashboardPage() {
     onError: (err) => setError(err instanceof Error ? err.message : "Action failed"),
   });
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
     queryClient.clear();
-    navigate("/");
+    await logout();
   };
 
   const handleCreateBook = (event: FormEvent<HTMLFormElement>) => {
@@ -140,10 +138,10 @@ export default function DashboardPage() {
 
   const handleCreateNote = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!accessToken || !selectedSourceID || !noteContent.trim()) return;
+    if (!selectedSourceID || !noteContent.trim()) return;
     setError(null);
     activityMutation.mutate(async () => {
-      await createNote(accessToken, {
+      await createNote({
         source_id: selectedSourceID,
         content: noteContent.trim(),
         content_type: "note",
@@ -156,10 +154,10 @@ export default function DashboardPage() {
 
   const handleCreateReview = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!accessToken || !selectedSourceID) return;
+    if (!selectedSourceID) return;
     setError(null);
     activityMutation.mutate(async () => {
-      await createReview(accessToken, {
+      await createReview({
         source_id: selectedSourceID,
         rating: Number(reviewRating),
         content: reviewContent.trim() || undefined,
@@ -172,10 +170,10 @@ export default function DashboardPage() {
 
   const handleCreateCollection = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!accessToken || !selectedSourceID || !collectionName.trim()) return;
+    if (!selectedSourceID || !collectionName.trim()) return;
     setError(null);
     activityMutation.mutate(async () => {
-      await createCollection(accessToken, {
+      await createCollection({
         name: collectionName.trim(),
         is_public: collectionPublic,
         source_ids: [selectedSourceID],
@@ -186,7 +184,6 @@ export default function DashboardPage() {
   };
 
   const runProtected = (action: () => Promise<unknown>) => {
-    if (!accessToken) return;
     setError(null);
     activityMutation.mutate(action);
   };
@@ -223,19 +220,15 @@ export default function DashboardPage() {
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="space-y-6">
             <LibraryPanel
-              accessToken={accessToken}
               items={data.library}
               loading={dashboardQuery.isLoading}
-              onDelete={(id) => runProtected(() => deleteLibraryItem(accessToken as string, id))}
-              onUpdate={(id, payload) =>
-                runProtected(() => updateLibraryItem(accessToken as string, id, payload))
-              }
+              onDelete={(id) => runProtected(() => deleteLibraryItem(id))}
+              onUpdate={(id, payload) => runProtected(() => updateLibraryItem(id, payload))}
             />
             <SourcesPanel
-              accessToken={accessToken}
               librarySourceIDs={librarySourceIDs}
               loading={dashboardQuery.isLoading}
-              onAdd={(id) => runProtected(() => addLibraryItem(accessToken as string, id))}
+              onAdd={(id) => runProtected(() => addLibraryItem(id))}
               sources={data.sources}
             />
           </div>
@@ -273,15 +266,15 @@ export default function DashboardPage() {
             />
             <RecentNotesCard
               notes={data.notes}
-              onDelete={(id) => runProtected(() => deleteNote(accessToken as string, id))}
+              onDelete={(id) => runProtected(() => deleteNote(id))}
             />
             <RecentReviewsCard
               reviews={data.reviews}
-              onDelete={(id) => runProtected(() => deleteReview(accessToken as string, id))}
+              onDelete={(id) => runProtected(() => deleteReview(id))}
             />
             <CollectionsCard
               collections={data.collections}
-              onDelete={(id) => runProtected(() => deleteCollection(accessToken as string, id))}
+              onDelete={(id) => runProtected(() => deleteCollection(id))}
             />
           </aside>
         </div>

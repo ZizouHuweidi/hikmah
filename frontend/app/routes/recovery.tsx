@@ -16,7 +16,9 @@ export default function RecoveryPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle>Account Recovery</CardTitle>
-            <CardDescription>Password recovery is not implemented yet.</CardDescription>
+            <CardDescription>
+              Continue to sign in and choose the recovery option provided by Zitadel.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Link to="/login">

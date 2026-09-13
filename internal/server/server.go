@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -21,7 +22,11 @@ import (
 )
 
 func New(cfg *config.Config, database *db.DB, logger *slog.Logger) (*http.Server, error) {
-	tokenManager, err := auth.NewTokenManager(cfg.Auth.Issuer, cfg.Auth.Audience, cfg.Auth.Ed25519PrivateKey, cfg.Auth.AccessTokenLifetime)
+	oidcFlow, err := auth.NewOIDCFlow(context.Background(), auth.OIDCConfig{
+		Issuer: cfg.Auth.Issuer, InternalURL: cfg.Auth.InternalURL,
+		ClientID: cfg.Auth.ClientID, ClientSecret: cfg.Auth.ClientSecret,
+		RedirectURL: cfg.Auth.RedirectURL,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +39,6 @@ func New(cfg *config.Config, database *db.DB, logger *slog.Logger) (*http.Server
 	profileRepo := profiles.NewPostgresRepository(database)
 	reviewRepo := reviews.NewPostgresRepository(database)
 
-	authSvc := auth.NewService(authRepo, tokenManager, cfg.Auth.RefreshTokenLifetime, logger)
 	collectionSvc := collections.NewService(collectionRepo, logger)
 	librarySvc := library.NewService(libraryRepo, logger)
 	sourceSvc := sources.NewService(sourceRepo, logger)
@@ -42,7 +46,15 @@ func New(cfg *config.Config, database *db.DB, logger *slog.Logger) (*http.Server
 	profileSvc := profiles.NewService(profileRepo, logger)
 	reviewSvc := reviews.NewService(reviewRepo, logger)
 
-	authHndlr := auth.NewHandler(authSvc, cfg.Auth.CookieSecure, logger)
+	authHndlr := auth.NewHandler(authRepo, oidcFlow, auth.HandlerConfig{
+		SessionDuration: cfg.Auth.SessionLifetime,
+		CookieSecure:    cfg.Auth.CookieSecure,
+		TrustedOrigins:  cfg.Server.CORSAllowedOrigins,
+		StateKey:        cfg.Auth.StateKey,
+		PublicURL:       cfg.Auth.PublicURL,
+		OIDCIssuer:      cfg.Auth.Issuer,
+		OIDCClientID:    cfg.Auth.ClientID,
+	}, logger)
 	collectionHndlr := collections.NewHandler(collectionSvc, logger)
 	libraryHndlr := library.NewHandler(librarySvc, logger)
 	sourceHndlr := sources.NewHandler(sourceSvc, logger)

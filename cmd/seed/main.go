@@ -10,7 +10,6 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/zizouhuweidi/maktaba/internal/auth"
 )
 
 type bookSeed struct {
@@ -37,15 +36,11 @@ func main() {
 	defer db.Close()
 
 	userID := mustUUID()
-	passwordHash, err := auth.HashPassword("password12345")
-	if err != nil {
-		fatal("hash password: %v", err)
-	}
 	if _, err := db.Exec(ctx, `
 		INSERT INTO users (id, email, username, password_hash)
-		VALUES ($1, 'demo@example.com', 'demo_reader', $2)
-		ON CONFLICT (email) DO UPDATE SET username = EXCLUDED.username, password_hash = EXCLUDED.password_hash
-	`, userID.String(), passwordHash); err != nil {
+		VALUES ($1, 'demo@example.com', 'demo_reader', NULL)
+		ON CONFLICT (email) DO UPDATE SET username = EXCLUDED.username
+	`, userID.String()); err != nil {
 		fatal("seed user: %v", err)
 	}
 	if err := db.QueryRow(ctx, `SELECT id FROM users WHERE email = 'demo@example.com'`).Scan(&userID); err != nil {
@@ -91,7 +86,7 @@ func main() {
 	seedCollection(ctx, db, userID, sourceIDs)
 
 	fmt.Println("seeded demo data")
-	fmt.Println("login: demo@example.com / password12345")
+	fmt.Println("the demo profile is public; authenticate through Zitadel for private features")
 }
 
 func seedBook(ctx context.Context, db *pgxpool.Pool, book bookSeed) uuid.UUID {

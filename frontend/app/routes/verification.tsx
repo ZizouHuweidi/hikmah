@@ -18,7 +18,9 @@ export default function VerificationPage() {
             <div className="flex flex-col items-center text-center">
               <CheckCircle className="mb-4 h-16 w-16 text-emerald-500" />
               <h2 className="mb-2 text-xl font-semibold text-slate-900">Email Verification</h2>
-              <p className="mb-6 text-slate-600">Email verification is not implemented yet.</p>
+              <p className="mb-6 text-slate-600">
+                Email verification is managed securely by Zitadel.
+              </p>
               <Link to="/dashboard">
                 <Button>Go to Dashboard</Button>
               </Link>

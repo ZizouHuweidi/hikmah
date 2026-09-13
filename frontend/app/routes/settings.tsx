@@ -12,7 +12,7 @@ import { useAuthStore } from "~/lib/auth";
 export default function SettingsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isAuthenticated, isLoading, user, accessToken } = useAuthStore();
+  const { isAuthenticated, isLoading, user } = useAuthStore();
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [publicProfile, setPublicProfile] = useState(false);
@@ -24,9 +24,9 @@ export default function SettingsPage() {
   }, [isAuthenticated, isLoading, navigate]);
 
   const profileQuery = useQuery({
-    queryKey: ["profile", accessToken],
-    enabled: Boolean(isAuthenticated && accessToken),
-    queryFn: () => getProfile(accessToken as string),
+    queryKey: ["profile"],
+    enabled: isAuthenticated,
+    queryFn: getProfile,
   });
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function SettingsPage() {
 
   const updateMutation = useMutation({
     mutationFn: () =>
-      updateProfile(accessToken as string, {
+      updateProfile({
         display_name: displayName.trim() || undefined,
         bio: bio.trim() || undefined,
         public_profile: publicProfile,
@@ -52,7 +52,6 @@ export default function SettingsPage() {
 
   const handleSave = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!accessToken) return;
     setError(null);
     setMessage(null);
     updateMutation.mutate();
@@ -123,8 +122,10 @@ export default function SettingsPage() {
                 <Shield className="h-6 w-6 text-emerald-600" />
               </div>
               <div>
-                <p className="font-medium text-slate-900">Password auth enabled</p>
-                <p className="text-sm text-slate-500">OAuth support can be added later.</p>
+                <p className="font-medium text-slate-900">Protected by Zitadel</p>
+                <p className="text-sm text-slate-500">
+                  Manage sign-in methods with your identity account.
+                </p>
               </div>
             </div>
 

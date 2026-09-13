@@ -96,19 +96,13 @@ export type Profile = {
   updated_at: string;
 };
 
-type RequestOptions = RequestInit & {
-  accessToken?: string | null;
-};
+type RequestOptions = RequestInit;
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}) {
   const headers = new Headers(options.headers);
   if (options.body && !headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  if (options.accessToken) {
-    headers.set("Authorization", `Bearer ${options.accessToken}`);
-  }
-
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
     headers,
@@ -133,32 +127,28 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}) 
   return response.json() as Promise<T>;
 }
 
-export function getMe(accessToken: string) {
-  return apiRequest<User>("/api/me", { accessToken });
+export function getMe() {
+  return apiRequest<User>("/api/me");
 }
 
 export function listSources() {
   return apiRequest<Source[]>("/sources?type=book&limit=100");
 }
 
-export function createBook(accessToken: string, payload: unknown) {
+export function createBook(payload: unknown) {
   return apiRequest<Book>("/api/sources/books", {
     method: "POST",
-    accessToken,
     body: JSON.stringify(payload),
   });
 }
 
-export function listLibrary(accessToken: string) {
-  return apiRequest<LibraryItemWithSource[]>("/api/library/items/with-sources?limit=50", {
-    accessToken,
-  });
+export function listLibrary() {
+  return apiRequest<LibraryItemWithSource[]>("/api/library/items/with-sources?limit=50");
 }
 
-export function addLibraryItem(accessToken: string, sourceID: string) {
+export function addLibraryItem(sourceID: string) {
   return apiRequest<LibraryItem>("/api/library/items", {
     method: "POST",
-    accessToken,
     body: JSON.stringify({
       source_id: sourceID,
       status: "to_consume",
@@ -167,86 +157,77 @@ export function addLibraryItem(accessToken: string, sourceID: string) {
   });
 }
 
-export function updateLibraryItem(accessToken: string, itemID: string, payload: unknown) {
+export function updateLibraryItem(itemID: string, payload: unknown) {
   return apiRequest<LibraryItem>(`/api/library/items/${encodeURIComponent(itemID)}`, {
     method: "PUT",
-    accessToken,
     body: JSON.stringify(payload),
   });
 }
 
-export function deleteLibraryItem(accessToken: string, itemID: string) {
+export function deleteLibraryItem(itemID: string) {
   return apiRequest<void>(`/api/library/items/${encodeURIComponent(itemID)}`, {
     method: "DELETE",
-    accessToken,
   });
 }
 
-export function listNotes(accessToken: string) {
-  return apiRequest<Note[]>("/api/notes?limit=50", { accessToken });
+export function listNotes() {
+  return apiRequest<Note[]>("/api/notes?limit=50");
 }
 
-export function listReviews(accessToken: string) {
-  return apiRequest<Review[]>("/api/reviews?limit=50", { accessToken });
+export function listReviews() {
+  return apiRequest<Review[]>("/api/reviews?limit=50");
 }
 
-export function listCollections(accessToken: string) {
-  return apiRequest<Collection[]>("/api/collections?limit=50", { accessToken });
+export function listCollections() {
+  return apiRequest<Collection[]>("/api/collections?limit=50");
 }
 
-export function createNote(accessToken: string, payload: unknown) {
+export function createNote(payload: unknown) {
   return apiRequest<Note>("/api/notes", {
     method: "POST",
-    accessToken,
     body: JSON.stringify(payload),
   });
 }
 
-export function deleteNote(accessToken: string, noteID: string) {
+export function deleteNote(noteID: string) {
   return apiRequest<void>(`/api/notes/${encodeURIComponent(noteID)}`, {
     method: "DELETE",
-    accessToken,
   });
 }
 
-export function createReview(accessToken: string, payload: unknown) {
+export function createReview(payload: unknown) {
   return apiRequest<Review>("/api/reviews", {
     method: "POST",
-    accessToken,
     body: JSON.stringify(payload),
   });
 }
 
-export function deleteReview(accessToken: string, reviewID: string) {
+export function deleteReview(reviewID: string) {
   return apiRequest<void>(`/api/reviews/${encodeURIComponent(reviewID)}`, {
     method: "DELETE",
-    accessToken,
   });
 }
 
-export function createCollection(accessToken: string, payload: unknown) {
+export function createCollection(payload: unknown) {
   return apiRequest<Collection>("/api/collections", {
     method: "POST",
-    accessToken,
     body: JSON.stringify(payload),
   });
 }
 
-export function deleteCollection(accessToken: string, collectionID: string) {
+export function deleteCollection(collectionID: string) {
   return apiRequest<void>(`/api/collections/${encodeURIComponent(collectionID)}`, {
     method: "DELETE",
-    accessToken,
   });
 }
 
-export function getProfile(accessToken: string) {
-  return apiRequest<Profile>("/api/profile", { accessToken });
+export function getProfile() {
+  return apiRequest<Profile>("/api/profile");
 }
 
-export function updateProfile(accessToken: string, payload: unknown) {
+export function updateProfile(payload: unknown) {
   return apiRequest<Profile>("/api/profile", {
     method: "PUT",
-    accessToken,
     body: JSON.stringify(payload),
   });
 }

@@ -13,7 +13,7 @@ React Router framework mode app configured as a static SPA with `ssr: false`.
 
 - React Router framework mode for route organization.
 - React Query for backend/server state, caching, mutations, and invalidation.
-- Zustand for client auth/session state and access-token persistence.
+- Zustand for client auth state backed by an HttpOnly Sabeel session cookie.
 - shadcn/Tailwind components under `app/components/ui`.
 - Go backend API URL comes from `VITE_MAKTABA_API_URL`, defaulting to `http://localhost:8080`.
 

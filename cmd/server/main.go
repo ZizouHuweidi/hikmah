@@ -23,14 +23,6 @@ func main() {
 		logger.Error("failed to load config", "error", err)
 		os.Exit(1)
 	}
-	if cfg.Auth.Ed25519PrivateKey == "" {
-		if cfg.Environment == "production" {
-			logger.Error("AUTH_ED25519_PRIVATE_KEY is required in production")
-			os.Exit(1)
-		}
-		logger.Warn("AUTH_ED25519_PRIVATE_KEY is not set; generated JWT keys will be ephemeral")
-	}
-
 	database, err := db.NewDB(cfg.Database.URL, cfg.Database.MaxOpenConns, cfg.Database.MaxIdleConns, cfg.Database.ConnMaxLifetime)
 	if err != nil {
 		logger.Error("failed to connect to database", "error", err)

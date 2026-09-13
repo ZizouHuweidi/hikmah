@@ -4,20 +4,8 @@ meta {
   seq: 1
 }
 
-post {
+get {
   url: {{base_url}}/auth/register
-  body: json
+  body: none
   auth: none
-}
-
-headers {
-  Content-Type: application/json
-}
-
-body:json {
-  {
-    "email": "reader@example.com",
-    "username": "reader",
-    "password": "change-me-please"
-  }
 }

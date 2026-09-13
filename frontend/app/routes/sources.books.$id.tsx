@@ -8,13 +8,13 @@ import { useAuthStore } from "~/lib/auth";
 
 export default function BookDetailPage() {
   const { id = "" } = useParams();
-  const { isAuthenticated, accessToken } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const bookQuery = useQuery({
     queryKey: ["book", id],
     queryFn: () => getBook(id),
     enabled: Boolean(id),
   });
-  const addMutation = useMutation({ mutationFn: () => addLibraryItem(accessToken as string, id) });
+  const addMutation = useMutation({ mutationFn: () => addLibraryItem(id) });
 
   if (bookQuery.isLoading)
     return (
@@ -70,7 +70,7 @@ export default function BookDetailPage() {
             {isAuthenticated && (
               <Button
                 onClick={() => addMutation.mutate()}
-                disabled={addMutation.isPending || addMutation.isSuccess || !accessToken}
+                disabled={addMutation.isPending || addMutation.isSuccess}
               >
                 <Library className="h-4 w-4" /> {addMutation.isSuccess ? "Added" : "Add to library"}
               </Button>

@@ -8,6 +8,13 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AuthSession struct {
+	TokenHash []byte             `db:"token_hash" json:"token_hash"`
+	UserID    pgtype.UUID        `db:"user_id" json:"user_id"`
+	ExpiresAt pgtype.Timestamptz `db:"expires_at" json:"expires_at"`
+	CreatedAt pgtype.Timestamptz `db:"created_at" json:"created_at"`
+}
+
 type BookMetadatum struct {
 	SourceID  pgtype.UUID        `db:"source_id" json:"source_id"`
 	Isbn10    pgtype.Text        `db:"isbn_10" json:"isbn_10"`
@@ -131,10 +138,12 @@ type User struct {
 	ID              pgtype.UUID        `db:"id" json:"id"`
 	Email           string             `db:"email" json:"email"`
 	Username        string             `db:"username" json:"username"`
-	PasswordHash    string             `db:"password_hash" json:"password_hash"`
+	PasswordHash    pgtype.Text        `db:"password_hash" json:"password_hash"`
 	EmailVerifiedAt pgtype.Timestamptz `db:"email_verified_at" json:"email_verified_at"`
 	CreatedAt       pgtype.Timestamptz `db:"created_at" json:"created_at"`
 	UpdatedAt       pgtype.Timestamptz `db:"updated_at" json:"updated_at"`
+	OidcIssuer      pgtype.Text        `db:"oidc_issuer" json:"oidc_issuer"`
+	OidcSubject     pgtype.Text        `db:"oidc_subject" json:"oidc_subject"`
 }
 
 type UserLibraryItem struct {

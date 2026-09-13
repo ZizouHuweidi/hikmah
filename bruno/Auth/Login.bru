@@ -4,19 +4,8 @@ meta {
   seq: 2
 }
 
-post {
+get {
   url: {{base_url}}/auth/login
-  body: json
+  body: none
   auth: none
-}
-
-headers {
-  Content-Type: application/json
-}
-
-body:json {
-  {
-    "login": "reader",
-    "password": "change-me-please"
-  }
 }
