@@ -15,7 +15,7 @@ export default function Header() {
             className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm font-semibold text-slate-900 no-underline shadow-sm sm:px-4 sm:py-2"
           >
             <span className="h-2 w-2 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400" />
-            Bayt al Hikmah
+            Sabeel
           </Link>
         </h2>
 

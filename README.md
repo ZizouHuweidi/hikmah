@@ -1,6 +1,6 @@
-# Hikmah
+# Sabeel
 
-Hikmah is a personal knowledge library for collecting, tracking, annotating, and reviewing sources such as books and other learning media.
+Sabeel is a personal knowledge library for collecting, tracking, annotating, and reviewing sources such as books and other learning media.
 
 The MVP focuses on helping a reader build a library, track reading progress, write notes and reviews, organize sources into collections, and publish a lightweight public profile.
 

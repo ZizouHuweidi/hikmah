@@ -41,5 +41,5 @@ createServer((request, response) => {
     })
     .pipe(response);
 }).listen(port, "0.0.0.0", () => {
-  console.log(`Serving Bayt al Hikmah frontend on http://0.0.0.0:${port}`);
+  console.log(`Serving Sabeel frontend on http://0.0.0.0:${port}`);
 });

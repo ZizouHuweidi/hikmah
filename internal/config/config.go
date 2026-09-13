@@ -89,8 +89,8 @@ func Load() (*Config, error) {
 			ConnMaxLifetime: connMaxLifetime,
 		},
 		Auth: AuthConfig{
-			Issuer:               getEnv("AUTH_ISSUER", "bayt-alhikmah"),
-			Audience:             getEnv("AUTH_AUDIENCE", "bayt-alhikmah-api"),
+			Issuer:               getEnv("AUTH_ISSUER", "sabeel"),
+			Audience:             getEnv("AUTH_AUDIENCE", "sabeel-api"),
 			Ed25519PrivateKey:    getEnv("AUTH_ED25519_PRIVATE_KEY", ""),
 			AccessTokenLifetime:  accessTokenLifetime,
 			RefreshTokenLifetime: refreshTokenLifetime,

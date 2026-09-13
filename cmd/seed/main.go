@@ -55,7 +55,7 @@ func main() {
 	profileID := mustUUID()
 	if _, err := db.Exec(ctx, `
 		INSERT INTO profiles (id, user_id, display_name, bio, public_profile)
-		VALUES ($1, $2, 'Demo Reader', 'A public demo profile for exploring Bayt al Hikmah.', true)
+		VALUES ($1, $2, 'Demo Reader', 'A public demo profile for exploring Sabeel.', true)
 		ON CONFLICT (user_id) DO UPDATE SET display_name = EXCLUDED.display_name, bio = EXCLUDED.bio, public_profile = true
 	`, profileID.String(), userID.String()); err != nil {
 		fatal("seed profile: %v", err)

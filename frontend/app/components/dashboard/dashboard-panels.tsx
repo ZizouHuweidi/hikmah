@@ -40,7 +40,7 @@ export function DashboardHeader({
           <div className="rounded-lg bg-emerald-600 p-2">
             <Library className="h-5 w-5 text-white" />
           </div>
-          <span className="text-xl font-bold text-slate-900">Bayt al Hikmah</span>
+          <span className="text-xl font-bold text-slate-900">Sabeel</span>
         </div>
         <div className="flex items-center gap-4">
           <span className="hidden text-sm text-slate-600 sm:inline">Welcome, {displayName}</span>

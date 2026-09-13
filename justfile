@@ -27,10 +27,10 @@ images:
     just frontend-image
 
 backend-image:
-    podman build -f Containerfile -t bayt-alhikmah:latest .
+    podman build -f Containerfile -t sabeel:latest .
 
 frontend-image:
-    podman build -f frontend/Containerfile -t bayt-alhikmah-frontend:latest frontend
+    podman build -f frontend/Containerfile -t sabeel-frontend:latest frontend
 
 compose-build:
     {{ compose }} build

@@ -6,15 +6,15 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -o bayt-alhikmah ./cmd/server
+RUN CGO_ENABLED=0 GOOS=linux go build -o sabeel ./cmd/server
 
 FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
 
 WORKDIR /app
-COPY --from=builder /app/bayt-alhikmah .
+COPY --from=builder /app/sabeel .
 
 EXPOSE 8080
 
-CMD ["./bayt-alhikmah"]
+CMD ["./sabeel"]

@@ -1,4 +1,4 @@
-# Bayt al Hikmah API Bruno Collection
+# Sabeel API Bruno Collection
 
 Open this `bruno/` directory in Bruno.
 

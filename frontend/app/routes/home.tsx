@@ -4,7 +4,7 @@ import { Button } from "~/components/ui/button";
 import { useAuthStore } from "~/lib/auth";
 export function meta() {
   return [
-    { title: "Bayt al Hikmah - House of Wisdom" },
+    { title: "Sabeel - Knowledge Library" },
     { name: "description", content: "Organize, track, and share your knowledge library." },
   ];
 }
@@ -62,13 +62,12 @@ export default function Home() {
         <div className="relative mx-auto max-w-6xl text-center">
           <div className="mb-8 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-2 text-sm font-medium text-emerald-800">
             <Sparkles className="h-4 w-4" />
-            <span>Inspired by the House of Wisdom</span>
+            <span>A path for organized learning</span>
           </div>
 
           <h1 className="mb-6 text-5xl font-bold tracking-tight text-slate-900 md:text-7xl">
-            <span className="block">Bayt al</span>
             <span className="block bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-              Hikmah
+              Sabeel
             </span>
           </h1>
           <p className="mx-auto mb-4 max-w-2xl text-xl text-slate-600">
@@ -76,8 +75,7 @@ export default function Home() {
             media.
           </p>
           <p className="mx-auto mb-10 max-w-xl text-slate-500">
-            Inspired by the historical center of learning from the Islamic Golden Age, reimagined
-            for today.
+            Built for readers who want a clearer path through books, notes, reviews, and ideas.
           </p>
 
           <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">

@@ -1,4 +1,4 @@
-# Bayt al Hikmah Frontend
+# Sabeel Frontend
 
 React Router framework mode app configured as a static SPA with `ssr: false`.
 

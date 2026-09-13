@@ -11,7 +11,7 @@ export default function VerificationPage() {
           <div className="mb-4 rounded-xl bg-emerald-600 p-3">
             <Library className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900">Bayt al Hikmah</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Sabeel</h1>
         </div>
         <Card>
           <CardContent className="pt-6">
