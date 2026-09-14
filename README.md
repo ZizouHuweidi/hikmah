@@ -66,6 +66,10 @@ Open the `bruno/` directory in Bruno and select the `local` environment. The col
 
 See [`docs/v1-plan.md`](docs/v1-plan.md) for the V1 scope, current status, delivery sequence, and release criteria.
 
+See [`docs/catalog-foundation.md`](docs/catalog-foundation.md) for the work and
+edition model, provider integration, data migration, deduplication, and personal
+reading-history import design.
+
 See [`docs/identity.md`](docs/identity.md) for the Zitadel client, browser flow, migration behavior, and production requirements.
 
 See [`docs/deployment.md`](docs/deployment.md) for production deployment, backup, and recovery.
