@@ -13,7 +13,7 @@ type AuthState = {
 
 const emptyUser: User = { id: "" };
 
-function authURL(path: string, returnTo = "/dashboard") {
+export function authURL(path: string, returnTo = "/dashboard") {
   const query = new URLSearchParams({ return_to: returnTo });
   return `${API_URL}${path}?${query}`;
 }

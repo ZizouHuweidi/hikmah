@@ -1,0 +1,14 @@
+:8080 {
+	@root path /
+	rewrite @root /ui/v2/login/
+
+	@login path /ui/v2/login*
+	reverse_proxy @login zitadel-login:3000
+
+	reverse_proxy h2c://zitadel-api:8080 {
+		header_up Host {$SABEEL_AUTH_DOMAIN}
+		header_up X-Forwarded-Host {$SABEEL_AUTH_DOMAIN}
+		header_up X-Forwarded-Port 443
+		header_up X-Forwarded-Proto https
+	}
+}

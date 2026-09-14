@@ -1,0 +1,27 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$SABEEL_AUTH_DOMAIN} {
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	}
+	reverse_proxy zitadel-proxy:8080
+}
+
+{$SABEEL_DOMAIN} {
+	header {
+		-Server
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+	}
+
+	@api path /auth/* /me /health /ready /sources* /users* /profile /library* /notes* /reviews* /collections*
+	handle @api {
+		reverse_proxy app:8080
+	}
+
+	handle {
+		reverse_proxy frontend:3000
+	}
+}

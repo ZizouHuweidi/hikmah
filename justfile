@@ -1,13 +1,14 @@
 set dotenv-load
 
 compose := "podman compose"
-database_url := env_var_or_default("DATABASE_URL", "postgres://maktaba:maktaba@localhost:5432/maktaba?sslmode=disable")
+database_url := env_var_or_default("DATABASE_URL", "postgres://sabeel:sabeel@localhost:5432/sabeel?sslmode=disable")
+production_env := env_var_or_default("SABEEL_PRODUCTION_ENV", ".env.production")
 sqlc_image := "docker.io/sqlc/sqlc:1.30.0"
 
 default:
     just --list
 
-up:
+up: compose-build
     {{ compose }} up -d
 
 down:
@@ -18,6 +19,24 @@ logs:
 
 ps:
     {{ compose }} ps
+
+prod-config:
+    {{ compose }} --env-file {{ production_env }} -f compose.production.yaml config --quiet
+
+prod-build: prod-config
+    {{ compose }} --env-file {{ production_env }} -f compose.production.yaml build app frontend
+
+prod-up: prod-build
+    {{ compose }} --env-file {{ production_env }} -f compose.production.yaml up -d
+
+prod-down:
+    {{ compose }} --env-file {{ production_env }} -f compose.production.yaml down
+
+prod-logs:
+    {{ compose }} --env-file {{ production_env }} -f compose.production.yaml logs -f
+
+prod-ps:
+    {{ compose }} --env-file {{ production_env }} -f compose.production.yaml ps
 
 build:
     just backend-image
@@ -84,7 +103,7 @@ seed:
     DATABASE_URL='{{ database_url }}' go run ./cmd/seed
 
 db-shell:
-    {{ compose }} exec postgres psql -U maktaba -d maktaba
+    {{ compose }} exec postgres psql -U sabeel -d sabeel
 
 health:
     curl -fsS http://localhost:8080/health
@@ -124,4 +143,4 @@ frontend-ci:
     just frontend-typecheck
     just frontend-build
 
-dev: up migrate
+dev: up

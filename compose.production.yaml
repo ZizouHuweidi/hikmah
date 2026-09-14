@@ -1,30 +1,34 @@
-name: sabeel
+name: sabeel-production
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
 
 services:
   postgres:
     image: pgvector/pgvector:pg18
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-sabeel}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sabeel}
-      POSTGRES_DB: ${POSTGRES_DB:-sabeel}
-    ports:
-      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+      POSTGRES_USER: sabeel
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: sabeel
     volumes:
-      - app_postgres_data:/var/lib/postgresql
-      - ./migrations:/migrations:ro,Z
+      - postgres_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-sabeel} -d $${POSTGRES_DB:-sabeel}"]
+      test: ["CMD-SHELL", "pg_isready -U sabeel -d sabeel"]
       interval: 5s
       timeout: 5s
       retries: 20
       start_period: 10s
+    logging: *default-logging
     restart: unless-stopped
 
   zitadel-postgres:
     image: docker.io/postgres:18-alpine
     environment:
       POSTGRES_USER: zitadel
-      POSTGRES_PASSWORD: ${ZITADEL_POSTGRES_PASSWORD:-sabeel_zitadel_dev}
+      POSTGRES_PASSWORD: ${ZITADEL_POSTGRES_PASSWORD:?set ZITADEL_POSTGRES_PASSWORD}
       POSTGRES_DB: zitadel
     volumes:
       - zitadel_postgres_data:/var/lib/postgresql
@@ -34,28 +38,23 @@ services:
       timeout: 5s
       retries: 20
       start_period: 10s
-    restart: unless-stopped
-
-  mailpit:
-    image: docker.io/axllent/mailpit:v1.31.0
-    ports:
-      - "127.0.0.1:${MAILPIT_HTTP_PORT:-8025}:8025"
+    logging: *default-logging
     restart: unless-stopped
 
   zitadel-api:
     image: ghcr.io/zitadel/zitadel:v4.16.2
     user: "0"
-    command: ["start-from-init", "--masterkey", "${ZITADEL_MASTERKEY:-SabeelDevMasterKey1234567890ABCD}"]
+    command: ["start-from-init", "--masterkey", "${ZITADEL_MASTERKEY:?set ZITADEL_MASTERKEY}"]
     environment:
       ZITADEL_PORT: "8080"
-      ZITADEL_EXTERNALDOMAIN: 127.0.0.1
-      ZITADEL_EXTERNALPORT: ${ZITADEL_PORT:-8081}
-      ZITADEL_EXTERNALSECURE: "false"
+      ZITADEL_EXTERNALDOMAIN: ${SABEEL_AUTH_DOMAIN:?set SABEEL_AUTH_DOMAIN}
+      ZITADEL_EXTERNALPORT: "443"
+      ZITADEL_EXTERNALSECURE: "true"
       ZITADEL_TLS_ENABLED: "false"
-      ZITADEL_DATABASE_POSTGRES_DSN: postgresql://zitadel:${ZITADEL_POSTGRES_PASSWORD:-sabeel_zitadel_dev}@zitadel-postgres:5432/zitadel?sslmode=disable
+      ZITADEL_DATABASE_POSTGRES_DSN: postgresql://zitadel:${ZITADEL_POSTGRES_PASSWORD}@zitadel-postgres:5432/zitadel?sslmode=disable
       ZITADEL_FIRSTINSTANCE_ORG_HUMAN_USERNAME: ${ZITADEL_ADMIN_USERNAME:-zitadel-admin}
-      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD: ${ZITADEL_ADMIN_PASSWORD:-Password1!}
-      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: "false"
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORD: ${ZITADEL_ADMIN_PASSWORD:?set ZITADEL_ADMIN_PASSWORD}
+      ZITADEL_FIRSTINSTANCE_ORG_HUMAN_PASSWORDCHANGEREQUIRED: "true"
       ZITADEL_FIRSTINSTANCE_PATPATH: /zitadel/bootstrap/admin.pat
       ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINE_USERNAME: sabeel-bootstrap
       ZITADEL_FIRSTINSTANCE_ORG_MACHINE_MACHINE_NAME: Sabeel Bootstrap
@@ -65,7 +64,7 @@ services:
       ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_MACHINE_NAME: Sabeel Login Client
       ZITADEL_FIRSTINSTANCE_ORG_LOGINCLIENT_PAT_EXPIRATIONDATE: ${ZITADEL_LOGIN_CLIENT_PAT_EXPIRATION:-2099-01-01T00:00:00Z}
       ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_REQUIRED: "true"
-      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI: http://127.0.0.1:${ZITADEL_PORT:-8081}/ui/v2/login/
+      ZITADEL_DEFAULTINSTANCE_FEATURES_LOGINV2_BASEURI: https://${SABEEL_AUTH_DOMAIN}/ui/v2/login/
       ZITADEL_DEFAULTINSTANCE_LABELPOLICY_PRIMARYCOLOR: "#1d4236"
       ZITADEL_DEFAULTINSTANCE_LABELPOLICY_BACKGROUNDCOLOR: "#dbe3d9"
       ZITADEL_DEFAULTINSTANCE_LABELPOLICY_WARNCOLOR: "#a64b42"
@@ -74,30 +73,29 @@ services:
       ZITADEL_DEFAULTINSTANCE_LABELPOLICY_BACKGROUNDCOLORDARK: "#14221d"
       ZITADEL_DEFAULTINSTANCE_LABELPOLICY_WARNCOLORDARK: "#a64b42"
       ZITADEL_DEFAULTINSTANCE_LABELPOLICY_FONTCOLORDARK: "#f6f5ef"
-      ZITADEL_OIDC_DEFAULTLOGINURLV2: http://127.0.0.1:${ZITADEL_PORT:-8081}/ui/v2/login/login?authRequest=
-      ZITADEL_OIDC_DEFAULTLOGOUTURLV2: http://127.0.0.1:${ZITADEL_PORT:-8081}/ui/v2/login/logout?post_logout_redirect=
-      ZITADEL_SAML_DEFAULTLOGINURLV2: http://127.0.0.1:${ZITADEL_PORT:-8081}/ui/v2/login/login?samlRequest=
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_HOST: mailpit:1025
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_USER: ""
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_PASSWORD: ""
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_TLS: "false"
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_FROM: identity@sabeel.local
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_FROMNAME: Sabeel Identity
-      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_REPLYTOADDRESS: identity@sabeel.local
+      ZITADEL_OIDC_DEFAULTLOGINURLV2: https://${SABEEL_AUTH_DOMAIN}/ui/v2/login/login?authRequest=
+      ZITADEL_OIDC_DEFAULTLOGOUTURLV2: https://${SABEEL_AUTH_DOMAIN}/ui/v2/login/logout?post_logout_redirect=
+      ZITADEL_SAML_DEFAULTLOGINURLV2: https://${SABEEL_AUTH_DOMAIN}/ui/v2/login/login?samlRequest=
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_HOST: ${ZITADEL_SMTP_HOST:?set ZITADEL_SMTP_HOST}
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_USER: ${ZITADEL_SMTP_USER:-}
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_SMTP_PASSWORD: ${ZITADEL_SMTP_PASSWORD:-}
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_TLS: ${ZITADEL_SMTP_TLS:-true}
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_FROM: ${ZITADEL_SMTP_FROM:?set ZITADEL_SMTP_FROM}
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_FROMNAME: ${ZITADEL_SMTP_FROM_NAME:-Sabeel Identity}
+      ZITADEL_DEFAULTINSTANCE_SMTPCONFIGURATION_REPLYTOADDRESS: ${ZITADEL_SMTP_REPLY_TO:?set ZITADEL_SMTP_REPLY_TO}
       ZITADEL_LOGSTORE_ACCESS_STDOUT_ENABLED: "true"
     volumes:
       - zitadel_bootstrap:/zitadel/bootstrap:rw
     depends_on:
       zitadel-postgres:
         condition: service_healthy
-      mailpit:
-        condition: service_started
     healthcheck:
       test: ["CMD", "/app/zitadel", "ready"]
       interval: 10s
       timeout: 30s
       retries: 20
       start_period: 20s
+    logging: *default-logging
     restart: unless-stopped
 
   zitadel-login:
@@ -108,7 +106,7 @@ services:
       NEXT_PUBLIC_BASE_PATH: /ui/v2/login
       ZITADEL_SERVICE_USER_TOKEN_FILE: /zitadel/bootstrap/login-client.pat
       EMAIL_VERIFICATION: "true"
-      CUSTOM_REQUEST_HEADERS: Host:127.0.0.1:${ZITADEL_PORT:-8081},X-Forwarded-Proto:http
+      CUSTOM_REQUEST_HEADERS: Host:${SABEEL_AUTH_DOMAIN},X-Forwarded-Proto:https
     volumes:
       - zitadel_bootstrap:/zitadel/bootstrap:ro
     depends_on:
@@ -120,75 +118,75 @@ services:
       timeout: 30s
       retries: 20
       start_period: 20s
+    logging: *default-logging
     restart: unless-stopped
 
   zitadel-proxy:
     image: docker.io/library/caddy:2.10.2-alpine
     environment:
-      ZITADEL_PORT: ${ZITADEL_PORT:-8081}
+      SABEEL_AUTH_DOMAIN: ${SABEEL_AUTH_DOMAIN}
     volumes:
-      - ./infra/zitadel/Caddyfile.dev:/etc/caddy/Caddyfile:ro,Z
-    ports:
-      - "127.0.0.1:${ZITADEL_PORT:-8081}:8080"
+      - ./infra/zitadel/Caddyfile.production:/etc/caddy/Caddyfile:ro,Z
     depends_on:
       zitadel-api:
         condition: service_healthy
       zitadel-login:
         condition: service_healthy
+    logging: *default-logging
     restart: unless-stopped
 
   zitadel-bootstrap:
-    image: sabeel:latest
+    image: ${SABEEL_API_IMAGE:-sabeel:latest}
     entrypoint: ["/app/zitadel-bootstrap"]
     environment:
       ZITADEL_BOOTSTRAP_API_URL: http://zitadel-api:8080
-      ZITADEL_BOOTSTRAP_INSTANCE_HOST: 127.0.0.1:${ZITADEL_PORT:-8081}
-      ZITADEL_BOOTSTRAP_FORWARDED_PROTO: http
+      ZITADEL_BOOTSTRAP_INSTANCE_HOST: ${SABEEL_AUTH_DOMAIN}
+      ZITADEL_BOOTSTRAP_FORWARDED_PROTO: https
       ZITADEL_BOOTSTRAP_PAT_FILE: /zitadel/bootstrap/admin.pat
       ZITADEL_BOOTSTRAP_OUTPUT_DIR: /zitadel/bootstrap/sabeel
       ZITADEL_BOOTSTRAP_PROJECT_NAME: Sabeel
-      ZITADEL_BOOTSTRAP_APP_NAME: sabeel-web-dev
-      ZITADEL_BOOTSTRAP_REDIRECT_URI: http://localhost:${FRONTEND_PORT:-3000}/auth/callback
-      ZITADEL_BOOTSTRAP_LOGOUT_URI: http://localhost:${FRONTEND_PORT:-3000}
-      ZITADEL_BOOTSTRAP_DEV_MODE: "true"
+      ZITADEL_BOOTSTRAP_APP_NAME: sabeel-web-production
+      ZITADEL_BOOTSTRAP_REDIRECT_URI: https://${SABEEL_DOMAIN:?set SABEEL_DOMAIN}/auth/callback
+      ZITADEL_BOOTSTRAP_LOGOUT_URI: https://${SABEEL_DOMAIN}
+      ZITADEL_BOOTSTRAP_DEV_MODE: "false"
     volumes:
       - zitadel_bootstrap:/zitadel/bootstrap:rw
     depends_on:
       zitadel-api:
         condition: service_healthy
+    logging: *default-logging
     restart: "no"
 
   migrate:
-    image: sabeel:latest
+    image: ${SABEEL_API_IMAGE:-sabeel:latest}
     entrypoint: ["/app/sabeel-migrate"]
     command: ["up"]
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-sabeel}:${POSTGRES_PASSWORD:-sabeel}@postgres:5432/${POSTGRES_DB:-sabeel}?sslmode=disable
+      DATABASE_URL: postgres://sabeel:${POSTGRES_PASSWORD}@postgres:5432/sabeel?sslmode=disable
     depends_on:
       postgres:
         condition: service_healthy
+    logging: *default-logging
     restart: "no"
 
   app:
     build:
       context: .
       dockerfile: Containerfile
-    image: sabeel:latest
-    ports:
-      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    image: ${SABEEL_API_IMAGE:-sabeel:latest}
     environment:
-      DATABASE_URL: postgres://${POSTGRES_USER:-sabeel}:${POSTGRES_PASSWORD:-sabeel}@postgres:5432/${POSTGRES_DB:-sabeel}?sslmode=disable
-      ENVIRONMENT: development
+      DATABASE_URL: postgres://sabeel:${POSTGRES_PASSWORD}@postgres:5432/sabeel?sslmode=disable
+      ENVIRONMENT: production
       PORT: 8080
-      CORS_ALLOWED_ORIGINS: http://localhost:${FRONTEND_PORT:-3000},http://127.0.0.1:5173,http://localhost:5173
-      SABEEL_PUBLIC_URL: http://localhost:${FRONTEND_PORT:-3000}
-      SABEEL_OIDC_ISSUER: http://127.0.0.1:${ZITADEL_PORT:-8081}
+      CORS_ALLOWED_ORIGINS: https://${SABEEL_DOMAIN}
+      SABEEL_PUBLIC_URL: https://${SABEEL_DOMAIN}
+      SABEEL_OIDC_ISSUER: https://${SABEEL_AUTH_DOMAIN}
       SABEEL_OIDC_INTERNAL_URL: http://zitadel-proxy:8080
       SABEEL_OIDC_CLIENT_ID_FILE: /zitadel/bootstrap/sabeel/client-id
       SABEEL_OIDC_CLIENT_SECRET_FILE: /zitadel/bootstrap/sabeel/client-secret
-      SABEEL_OIDC_REDIRECT_URL: http://localhost:${FRONTEND_PORT:-3000}/auth/callback
-      SABEEL_OIDC_STATE_KEY: ${SABEEL_OIDC_STATE_KEY:-sabeel-development-state-key-32chars}
-      SABEEL_SESSION_SECURE: "false"
+      SABEEL_OIDC_REDIRECT_URL: https://${SABEEL_DOMAIN}/auth/callback
+      SABEEL_OIDC_STATE_KEY: ${SABEEL_OIDC_STATE_KEY:?set SABEEL_OIDC_STATE_KEY}
+      SABEEL_SESSION_SECURE: "true"
     volumes:
       - zitadel_bootstrap:/zitadel/bootstrap:ro
     depends_on:
@@ -204,6 +202,7 @@ services:
       timeout: 5s
       retries: 10
       start_period: 10s
+    logging: *default-logging
     restart: unless-stopped
 
   frontend:
@@ -211,8 +210,8 @@ services:
       context: ./frontend
       dockerfile: Containerfile
       args:
-        VITE_SABEEL_API_URL: http://localhost:${FRONTEND_PORT:-3000}
-    image: sabeel-frontend:latest
+        VITE_SABEEL_API_URL: https://${SABEEL_DOMAIN}
+    image: ${SABEEL_FRONTEND_IMAGE:-sabeel-frontend:latest}
     environment:
       PORT: 3000
     healthcheck:
@@ -220,20 +219,34 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+    logging: *default-logging
     restart: unless-stopped
 
   gateway:
     image: docker.io/library/caddy:2.10.2-alpine
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL}
+      SABEEL_DOMAIN: ${SABEEL_DOMAIN}
+      SABEEL_AUTH_DOMAIN: ${SABEEL_AUTH_DOMAIN}
     volumes:
-      - ./infra/Caddyfile.dev:/etc/caddy/Caddyfile:ro,Z
+      - ./infra/Caddyfile.production:/etc/caddy/Caddyfile:ro,Z
+      - caddy_data:/data
+      - caddy_config:/config
     ports:
-      - "127.0.0.1:${FRONTEND_PORT:-3000}:8080"
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
     depends_on:
       frontend:
         condition: service_healthy
+      zitadel-proxy:
+        condition: service_started
+    logging: *default-logging
     restart: unless-stopped
 
 volumes:
-  app_postgres_data:
+  postgres_data:
   zitadel_postgres_data:
   zitadel_bootstrap:
+  caddy_data:
+  caddy_config:

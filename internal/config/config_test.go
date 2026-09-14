@@ -1,6 +1,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -20,6 +22,45 @@ func TestLoadRequiresOIDCCredentials(t *testing.T) {
 	_, err := Load()
 	if err == nil || !strings.Contains(err.Error(), "SABEEL_OIDC_CLIENT_ID") {
 		t.Fatalf("expected missing OIDC credentials error, got %v", err)
+	}
+}
+
+func TestLoadReadsOIDCCredentialsFromFiles(t *testing.T) {
+	t.Setenv("SABEEL_OIDC_CLIENT_ID", "")
+	t.Setenv("SABEEL_OIDC_CLIENT_SECRET", "")
+	t.Setenv("SABEEL_OIDC_STATE_KEY", "0123456789abcdef0123456789abcdef")
+	dir := t.TempDir()
+	idPath := filepath.Join(dir, "client-id")
+	secretPath := filepath.Join(dir, "client-secret")
+	if err := os.WriteFile(idPath, []byte("sabeel-file-client\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(secretPath, []byte("file-secret\n"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	t.Setenv("SABEEL_OIDC_CLIENT_ID_FILE", idPath)
+	t.Setenv("SABEEL_OIDC_CLIENT_SECRET_FILE", secretPath)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Auth.ClientID != "sabeel-file-client" || cfg.Auth.ClientSecret != "file-secret" {
+		t.Fatalf("unexpected file credentials: %+v", cfg.Auth)
+	}
+}
+
+func TestLoadPrefersOIDCCredentialsOverFiles(t *testing.T) {
+	setValidAuthEnv(t)
+	t.Setenv("SABEEL_OIDC_CLIENT_ID_FILE", filepath.Join(t.TempDir(), "missing"))
+	t.Setenv("SABEEL_OIDC_CLIENT_SECRET_FILE", filepath.Join(t.TempDir(), "missing"))
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.Auth.ClientID != "sabeel-web" || cfg.Auth.ClientSecret != "client-secret" {
+		t.Fatalf("unexpected direct credentials: %+v", cfg.Auth)
 	}
 }
 

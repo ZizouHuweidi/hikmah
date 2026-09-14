@@ -16,7 +16,7 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-	logger.Info("starting maktaba service")
+	logger.Info("starting Sabeel service")
 
 	cfg, err := config.Load()
 	if err != nil {

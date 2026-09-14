@@ -1,12 +1,11 @@
 import { ArrowRight } from "lucide-react";
 import { BrandMark } from "~/components/brand-mark";
-import { Button } from "~/components/ui/button";
+import { buttonVariants } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { useAuthStore } from "~/lib/auth";
+import { authURL } from "~/lib/auth";
+import { cn } from "~/lib/utils";
 
 export default function LoginPage() {
-  const login = useAuthStore((state) => state.login);
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#dbe3d9] px-4">
       <div className="w-full max-w-md">
@@ -21,10 +20,13 @@ export default function LoginPage() {
             <CardDescription>Continue securely with your Sabeel identity.</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full" size="lg" onClick={() => login()}>
+            <a
+              className={cn(buttonVariants({ size: "lg" }), "w-full")}
+              href={authURL("/auth/login")}
+            >
               Continue to sign in
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            </a>
           </CardContent>
         </Card>
       </div>

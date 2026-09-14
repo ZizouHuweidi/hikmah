@@ -1,12 +1,11 @@
 import { ArrowRight } from "lucide-react";
 import { BrandMark } from "~/components/brand-mark";
-import { Button } from "~/components/ui/button";
+import { buttonVariants } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { useAuthStore } from "~/lib/auth";
+import { authURL } from "~/lib/auth";
+import { cn } from "~/lib/utils";
 
 export default function RegistrationPage() {
-  const register = useAuthStore((state) => state.register);
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#dbe3d9] px-4">
       <div className="w-full max-w-md">
@@ -23,10 +22,13 @@ export default function RegistrationPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button className="w-full" size="lg" onClick={() => register()}>
+            <a
+              className={cn(buttonVariants({ size: "lg" }), "w-full")}
+              href={authURL("/auth/register")}
+            >
               Continue to registration
               <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
+            </a>
           </CardContent>
         </Card>
       </div>

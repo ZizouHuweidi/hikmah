@@ -73,6 +73,14 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	clientID, err := getSecretEnv("SABEEL_OIDC_CLIENT_ID", "SABEEL_OIDC_CLIENT_ID_FILE")
+	if err != nil {
+		return nil, err
+	}
+	clientSecret, err := getSecretEnv("SABEEL_OIDC_CLIENT_SECRET", "SABEEL_OIDC_CLIENT_SECRET_FILE")
+	if err != nil {
+		return nil, err
+	}
 
 	cfg := &Config{
 		Environment: getEnv("ENVIRONMENT", "development"),
@@ -83,16 +91,16 @@ func Load() (*Config, error) {
 			CORSAllowedOrigins: getEnvSlice("CORS_ALLOWED_ORIGINS", []string{"http://localhost:3000", "http://127.0.0.1:5173", "http://localhost:5173"}),
 		},
 		Database: DatabaseConfig{
-			URL:             getEnv("DATABASE_URL", "postgres://maktaba:maktaba@localhost:5432/maktaba?sslmode=disable"),
+			URL:             getEnv("DATABASE_URL", "postgres://sabeel:sabeel@localhost:5432/sabeel?sslmode=disable"),
 			MaxOpenConns:    maxOpenConns,
 			MaxIdleConns:    maxIdleConns,
 			ConnMaxLifetime: connMaxLifetime,
 		},
 		Auth: AuthConfig{
 			Issuer:          strings.TrimSuffix(getEnv("SABEEL_OIDC_ISSUER", "http://127.0.0.1:8081"), "/"),
-			InternalURL:     strings.TrimSuffix(getEnv("SABEEL_OIDC_INTERNAL_URL", "http://zitadel-dev-proxy:8080"), "/"),
-			ClientID:        strings.TrimSpace(os.Getenv("SABEEL_OIDC_CLIENT_ID")),
-			ClientSecret:    strings.TrimSpace(os.Getenv("SABEEL_OIDC_CLIENT_SECRET")),
+			InternalURL:     strings.TrimSuffix(getEnv("SABEEL_OIDC_INTERNAL_URL", "http://zitadel-proxy:8080"), "/"),
+			ClientID:        clientID,
+			ClientSecret:    clientSecret,
 			RedirectURL:     getEnv("SABEEL_OIDC_REDIRECT_URL", "http://localhost:8080/auth/callback"),
 			StateKey:        strings.TrimSpace(os.Getenv("SABEEL_OIDC_STATE_KEY")),
 			PublicURL:       strings.TrimSuffix(getEnv("SABEEL_PUBLIC_URL", "http://localhost:3000"), "/"),
@@ -104,7 +112,7 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("Sabeel OIDC and public URLs must be absolute http or https URLs")
 	}
 	if cfg.Auth.ClientID == "" || cfg.Auth.ClientSecret == "" {
-		return nil, fmt.Errorf("SABEEL_OIDC_CLIENT_ID and SABEEL_OIDC_CLIENT_SECRET are required")
+		return nil, fmt.Errorf("SABEEL_OIDC_CLIENT_ID and SABEEL_OIDC_CLIENT_SECRET are required (directly or through their _FILE variants)")
 	}
 	if len(cfg.Auth.StateKey) < 32 {
 		return nil, fmt.Errorf("SABEEL_OIDC_STATE_KEY must contain at least 32 characters")
@@ -119,6 +127,24 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("production requires HTTPS issuer, redirect, and public URLs")
 	}
 	return cfg, nil
+}
+
+func getSecretEnv(valueKey, fileKey string) (string, error) {
+	if value := strings.TrimSpace(os.Getenv(valueKey)); value != "" {
+		return value, nil
+	}
+	path := strings.TrimSpace(os.Getenv(fileKey))
+	if path == "" {
+		return "", nil
+	}
+	value, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("read %s: %w", fileKey, err)
+	}
+	if value = []byte(strings.TrimSpace(string(value))); len(value) == 0 {
+		return "", fmt.Errorf("%s is empty", fileKey)
+	}
+	return string(value), nil
 }
 
 func absoluteHTTPURL(raw string) bool {

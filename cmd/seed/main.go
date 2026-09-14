@@ -25,7 +25,7 @@ type bookSeed struct {
 func main() {
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
-		databaseURL = "postgres://maktaba:maktaba@localhost:5432/maktaba?sslmode=disable"
+		databaseURL = "postgres://sabeel:sabeel@localhost:5432/sabeel?sslmode=disable"
 	}
 
 	ctx := context.Background()

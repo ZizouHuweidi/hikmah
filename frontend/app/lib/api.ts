@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_MAKTABA_API_URL || "http://localhost:8080";
+export const API_URL = import.meta.env.VITE_SABEEL_API_URL || "http://localhost:8080";
 
 export type User = {
   id: string;
