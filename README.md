@@ -20,7 +20,7 @@ The MVP focuses on helping a reader build a library, track reading progress, wri
 
 ## Local Development
 
-Prerequisites: Go, Node/npm, Podman, Podman Compose, `just`, and the shared local Zitadel stack used by Atlas and Trains.
+Prerequisites: Go, Node/npm, Podman, Podman Compose, `just`.
 
 ```sh
 cp .env.example .env
