@@ -6,9 +6,9 @@
 	reverse_proxy @login zitadel-login:3000
 
 	reverse_proxy h2c://zitadel-api:8080 {
-		header_up Host 127.0.0.1:{$ZITADEL_PORT:8081}
-		header_up X-Forwarded-Host 127.0.0.1:{$ZITADEL_PORT:8081}
-		header_up X-Forwarded-Port {$ZITADEL_PORT:8081}
+		header_up Host 127.0.0.1:{$ZITADEL_HTTP_PORT:8081}
+		header_up X-Forwarded-Host 127.0.0.1:{$ZITADEL_HTTP_PORT:8081}
+		header_up X-Forwarded-Port {$ZITADEL_HTTP_PORT:8081}
 		header_up X-Forwarded-Proto http
 	}
 }
